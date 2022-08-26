@@ -8,6 +8,13 @@ from utils import loadData, updateSheet
 configVars = loadData()
 DEBUG_MODE = os.environ.get("PORT", True)
 
+if not configVars:
+    configVars = {
+        'DATABASE_NAME': os.getenv('DATABASE_NAME', None),
+        'DATABASE_SHEET': os.getenv('DATABASE_SHEET', None),
+        'PASSWORD': os.getenv('PASSWORD', None),
+    }
+
 app = Flask(__name__)
 
 if __name__ == "__main__":

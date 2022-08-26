@@ -26,13 +26,13 @@ def loadData():
         return {}
 
 def getCredentials():
-    if 1:
+    if 0:
         with open('.config/google.json') as file:
             data = json.load(file)
         return data
     else:
         key = bytes(os.getenv('KEY'), 'utf-8')
-        encrypted = bytes(os.getenv('GOOGLE_KEY'), 'utf-8')
+        encrypted = bytes(os.getenv('SECRET_GOOGLE'), 'utf-8')
         return json.loads(Fernet(key).decrypt(encrypted))
 
 def spreadSheetClient():
