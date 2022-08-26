@@ -6,7 +6,7 @@ import os
 from utils import loadData, updateSheet
 
 configVars = loadData()
-DEBUG_MODE = True
+DEBUG_MODE = os.environ.get("PORT", True)
 
 app = Flask(__name__)
 
