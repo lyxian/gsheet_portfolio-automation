@@ -26,13 +26,13 @@ def loadData():
         return {}
 
 def getCredentials():
-    if 1:
+    if 0:
         with open('.config/google.json') as file:
             data = json.load(file)
         return data
     else:
         key = bytes(os.getenv('KEY'), 'utf-8')
-        encrypted = bytes(os.getenv('GOOGLE_KEY'), 'utf-8')
+        encrypted = bytes(os.getenv('SECRET_GOOGLE'), 'utf-8')
         return json.loads(Fernet(key).decrypt(encrypted))
 
 def spreadSheetClient():
@@ -67,7 +67,7 @@ def newWorksheet(wb, query):
 def sheetPayload(data):
     payload = [['=NOW()' if '/' in i else i for i in data[0].keys()]]
     for i in data:
-        payload_i = [pendulum.parse(j, strict=False).format('M/D/YYYY h:mm:ss') if re.search(r'AM$|PM$', str(j)) else j for j in i.values()]
+        payload_i = [pendulum.from_format(j, 'DD MMM YYYY, hA').format('M/D/YYYY H:mm:ss') if re.search(r'AM$|PM$', str(j)) else j for j in i.values()]
         if payload_i[0] == 'transact_value':
             payload_i[1] = '=SUM(SGX!M2:M46)'
             payload_i[2] = '=SUM(ETC!M2:M46)'
@@ -76,6 +76,7 @@ def sheetPayload(data):
             payload_i[1] = '=SUM(SGX!S2:S46)'
             payload_i[2] = '=SUM(ETC!S2:S46)'
             payload_i[3] = '=C3*$C$5'
+            payload_i[4] = '=LEN(E2)'
         elif payload_i[0] == 'profit':
             payload_i[1] = '=B3-B2'
             payload_i[2] = '=C3-C2'
