@@ -11,6 +11,8 @@ Features :
 - deploy to Heroku
   - configure secrets
   - configure Heroku env
+- configure zapier
+  - add delay (trigger before hour)
 
 ##Packages (list required packages & run .scripts/python-pip.sh)
 cryptography==37.0.4

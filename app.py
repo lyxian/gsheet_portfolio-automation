@@ -1,12 +1,13 @@
 # from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request
 import requests
+import time
 import os
 
 from utils import loadData, updateSheet
 
 configVars = loadData()
-DEBUG_MODE = os.environ.get("PORT", True)
+DEBUG_MODE = os.environ.get("DEBUG_MODE", True)
 
 if not configVars:
     configVars = {
@@ -39,6 +40,9 @@ if __name__ == "__main__":
         if request.method == 'POST':
             password = os.getenv('PASSWORD') if not configVars else configVars['PASSWORD']
             if 'password' in request.json and request.json['password'] == int(password):
+                # Time Delay
+                time.sleep(50)
+                
                 # Trigger update
                 response = updateSheet(configVars)
                 if response['status'] == 'OK':
