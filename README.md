@@ -12,6 +12,10 @@ Features :
   - configure secrets
   - configure Heroku env
 
+Extras :
+
+- integrate encryptionStore
+
 ##Packages (list required packages & run .scripts/python-pip.sh)
 cryptography==37.0.4
 oauth2client==4.1.3
