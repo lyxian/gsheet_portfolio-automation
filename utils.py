@@ -1,6 +1,7 @@
 ### GOOGLE SHEETS API ###
 from oauth2client.service_account import ServiceAccountCredentials
 from cryptography.fernet import Fernet
+import requests
 import pendulum
 import gspread
 import yaml
@@ -16,6 +17,25 @@ DATETIME_FORMAT = {
     }
 }
 
+def retrieveKey():
+    required = ['APP_NAME', 'APP_PASS', 'STORE_PASS', 'STORE_URL']
+    if all(param in os.environ for param in required):
+        payload = {
+            'url': os.getenv('STORE_URL'),
+            'payload': {
+                'password': int(os.getenv('STORE_PASS')),
+                'app': os.getenv('APP_NAME'),
+                'key': int(os.getenv('APP_PASS'))
+            }
+        }
+        response = requests.post(payload['url'], json=payload['payload']).json()
+        if response.get('status') == 'OK':
+            return response.get('KEY')
+        else:
+            raise Exception('Bad response from KEY_STORE, please try again ..')
+    else:
+        raise Exception('No key store found, please check config ..')
+
 def loadData():
     configPath = 'secrets.yaml'
     if os.path.exists(configPath):
@@ -26,14 +46,9 @@ def loadData():
         return {}
 
 def getCredentials():
-    if 0:
-        with open('.config/google.json') as file:
-            data = json.load(file)
-        return data
-    else:
-        key = bytes(os.getenv('KEY'), 'utf-8')
-        encrypted = bytes(os.getenv('SECRET_GOOGLE'), 'utf-8')
-        return json.loads(Fernet(key).decrypt(encrypted))
+    key = bytes(retrieveKey(), 'utf-8')
+    encrypted = bytes(os.getenv('SECRET_GOOGLE'), 'utf-8')
+    return json.loads(Fernet(key).decrypt(encrypted))
 
 def spreadSheetClient():
     scope = [
