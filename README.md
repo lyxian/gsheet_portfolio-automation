@@ -4,8 +4,8 @@ Features :
 
 - server to receives requests
   - timings
-    - sg : 9, 11, 13, 15, 17
-    - us : 22, 0, 2, 3, 4
+    - sg : 10am, 1pm, 3pm, 6pm
+    - us : 10am, 12pm, 2pm, 5pm
 - gsheet to update spreadsheet
   - deal with formulae, cell format
 - deploy to Heroku
