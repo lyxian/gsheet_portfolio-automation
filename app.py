@@ -1,9 +1,10 @@
 # from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request
+import traceback
 import requests
 import os
 
-from utils import loadData, updateSheet
+from utils import loadData, updateSheet, postError
 
 configVars = loadData()
 DEBUG_MODE = os.environ.get("PORT", True)
@@ -19,14 +20,22 @@ app = Flask(__name__)
 
 if __name__ == "__main__":
 
-    @app.route("/stop")
+    @app.route("/stop", methods=["GET", "POST"])
     def stop():
-        shutdown_hook = request.environ.get("werkzeug.server.shutdown")
-        try:
-            shutdown_hook()
-            return {'status': 'NOT_OK'}, 404
-        except:
-            pass
+        if request.method == 'POST':
+            password = os.getenv('PASSWORD', '1234')
+            if 'password' in request.json and str(request.json['password']) == password:
+                shutdown_hook = request.environ.get("werkzeug.server.shutdown")
+                try:
+                    shutdown_hook()
+                    print("--End--")
+                except:
+                    pass
+                return {'status': 'OK'}, 200
+            else:
+                return {'ERROR': 'Wrong password!'}, 400
+        else:
+            return {'ERROR': 'Nothing here!'}, 404
 
     @app.route("/getIP", methods=["GET"])
     def _getIP():
@@ -39,15 +48,30 @@ if __name__ == "__main__":
         if request.method == 'POST':
             password = os.getenv('PASSWORD') if not configVars else configVars['PASSWORD']
             if 'password' in request.json and request.json['password'] == int(password):
-                # Trigger update
-                response = updateSheet(configVars)
-                if response['status'] == 'OK':
-                    return {'status': 'OK'}, 200
-                else:
-                    return response, 401
+                try:
+                    # Trigger update
+                    response = updateSheet(configVars)
+                    if response['status'] == 'OK':
+                        return {'status': 'OK'}, 200
+                    else:
+                        return response, 401
+                except Exception:
+                    error = traceback.format_exc().strip()
+                    try:
+                        response = postError(error)
+                        if response:
+                            print(f'=====APP ERROR=====\n{error}\n=====ERROR END=====')
+                            return {'status': 'NOT_OK', 'ERROR': 'Error posted successfully!'}, 503
+                        else:
+                            # INTERNAL SERVER ERROR
+                            return {'status': 'NOT_OK', 'ERROR': 'Unknown error!'}, 500
+                    except Exception as e:
+                        print(f'=====APP ERROR=====\n{error}\n=====ERROR END=====')
+                        print(f'=====LOG ERROR=====\n{e.__repr__()}\n=====ERROR END=====')
+                        return {'status': 'NOT_OK', 'ERROR': e.__repr__()}, 503
             else:
-                return {'ERROR': 'Wrong password!'}, 404
+                return {'status': 'NOT_OK', 'ERROR': 'Wrong password!'}, 401
         else:
-            return {'ERROR': 'Nothing here!'}, 404
+            return {'status': 'NOT_OK', 'ERROR': 'Nothing here!'}, 404
 
     app.run(debug=DEBUG_MODE, host="0.0.0.0", port=int(os.environ.get("PORT", 5005)))
