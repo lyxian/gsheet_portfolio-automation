@@ -178,10 +178,11 @@ def updateSheet(configVars):
             'result': response
         }
     except Exception as e:
-        return {
-            'status': 'NOT_OK',
-            'result': e.args[0]['message'][:100]
-        }
+        raise Exception(e.args[0]['message'][:100])
+        # return {
+        #     'status': 'NOT_OK',
+        #     'result': e.args[0]['message'][:100]
+        # }
 
 if __name__ == '__main__':
     if 1:
