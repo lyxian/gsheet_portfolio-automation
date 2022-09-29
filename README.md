@@ -15,6 +15,8 @@ Features :
 Extras :
 
 - integrate encryptionStore
+- integrate route errors
+  - password related exceptions (log in app)
 
 ##Packages (list required packages & run .scripts/python-pip.sh)
 cryptography==37.0.4
