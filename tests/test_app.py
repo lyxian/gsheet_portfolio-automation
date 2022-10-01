@@ -1,5 +1,6 @@
 # RUN (test_app.py in background first before running pytest)
 # - python -m pytest -p no:cacheprovider tests -sv
+# - python -m pytest -p no:cacheprovider tests -svk 'not update_success'
 # - pytest .. (if __init__.py exists in tests dir)
 
 import sys
@@ -29,12 +30,12 @@ def verbose():
     '''Returns default verbose setting'''
     return False
 
-def test_app_getPass_success(payload, verbose):
+def test_app_update_success(payload, verbose):
     if verbose:
         print(f'\nProper: {payload}')
     assert requests.post(payload['url'], json=payload['payload']).json().get('status') == 'OK'
 
-def test_app_getPass_failure(payload, verbose):
+def test_app_update_failure(payload, verbose):
 
     # Wrong password
     tmp = deepcopy(payload)
@@ -50,12 +51,41 @@ def test_app_getPass_failure(payload, verbose):
         print(f'Wrong method: GET')
     assert response.get('status') == 'NOT_OK' and response.get('ERROR') == 'Nothing here!'
 
+def test_app_update_postError_success(payload, verbose):
+    if verbose:
+        print(f'\nInvalid database: ')
+    configVars = loadSecrets()
+    payloadTestEnv = {
+        'DATABASE_NAME': 'INVALID'
+    }
+
+    response = requests.get('http://{}:{}/{}?'.format(configVars['LOCALHOST'], configVars['TEST_PORT'], 'setEnv')
+        + '&'.join([f'{i[0]}={i[1]}' for i in payloadTestEnv.items()])).json()
+    assert response.get('status') == 'OK'
+    
+    response = requests.post(payload['url'], json=payload['payload']).json()
+    assert response.get('status') == 'NOT_OK' and response.get('ERROR') == 'Error posted successfully!'
+
 if __name__ == '__main__':
+    from flask import request
     
     DEBUG_MODE = True
     configVars = loadSecrets()
-    configVars['DATABASE_NAME'] = configVars['TEST_DATABASE_NAME']
-    configVars['DATABASE_SHEET'] = configVars['TEST_DATABASE_SHEET']
+    os.environ['DATABASE_NAME'] = configVars['TEST_DATABASE_NAME']
+    os.environ['DATABASE_SHEET'] = configVars['TEST_DATABASE_SHEET']
 
-    app.configVars = configVars    
+    @app.route('/setEnv', methods=['GET'])
+    def _setEnv():
+        if request.method == 'GET':
+            try:
+                for key, val in request.args.items():
+                    os.environ[key] = val
+                    print(f'Key-{key} set to {val} successfully ..')
+                return {'status': 'OK'}, 200
+            except Exception as error:
+                print(f'=====TEST ERROR=====\n{error}\n=====ERROR END=====')
+                return {'status': 'NOT_OK', 'ERROR': error}, 503
+        else:
+            return {'status': 'NOT_OK', 'ERROR': 'Nothing here!'}, 404
+
     app.run(debug=DEBUG_MODE, host='0.0.0.0', port=int(configVars['TEST_PORT']))

@@ -123,10 +123,10 @@ def sheetPayload(data):
         payload += [payload_i]
     return payload
 
-def updateSheet(configVars):
+def updateSheet(databaseName, databaseSheet):
     client = spreadSheetClient()
-    wb = openWorkbook_name(client, configVars['DATABASE_NAME'])
-    sheet = wb.worksheet(configVars['DATABASE_SHEET'])
+    wb = openWorkbook_name(client, databaseName)
+    sheet = wb.worksheet(databaseSheet)
     data = sheet.get_all_records()
 
     headers = list(data[0].keys())
@@ -185,10 +185,4 @@ def updateSheet(configVars):
         # }
 
 if __name__ == '__main__':
-    if 1:
-        configVars = loadData()
-        response = updateSheet(configVars)
-        print(response['status'], response['result'])
-    else:
-        with open('sample.json') as file:
-            data = json.load(file)
+    pass
