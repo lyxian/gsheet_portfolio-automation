@@ -26,4 +26,5 @@ requests==2.28.1
 gspread==5.4.0
 pyyaml==6.0
 flask==2.2.2
+pytest==7.1.2
 ##Packages

@@ -58,7 +58,7 @@ def postError(error):
     else:
         raise Exception('No key store found, please check config ..')
 
-def loadData():
+def loadSecrets():
     configPath = 'secrets.yaml'
     if os.path.exists(configPath):
         with open(configPath) as file:
