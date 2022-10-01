@@ -4,20 +4,11 @@ import traceback
 import requests
 import os
 
-from utils import loadSecrets, updateSheet, postError
+from utils import updateSheet, postError
 
-configVars = loadSecrets()
 DEBUG_MODE = os.environ.get("DEBUG_MODE", True)
 
-if not configVars:
-    configVars = {
-        'DATABASE_NAME': os.getenv('DATABASE_NAME', None),
-        'DATABASE_SHEET': os.getenv('DATABASE_SHEET', None),
-        'PASSWORD': os.getenv('PASSWORD', None),
-    }
-
 app = Flask(__name__)
-app.configVars = configVars
 
 @app.route("/stop", methods=["GET", "POST"])
 def stop():
@@ -45,11 +36,11 @@ def _getIP():
 @app.route('/update', methods=['GET', 'POST'])
 def _update():
     if request.method == 'POST':
-        password = os.getenv('PASSWORD') if not app.configVars else app.configVars['PASSWORD']
+        password = os.getenv('PASSWORD')
         if 'password' in request.json and request.json['password'] == int(password):
             try:
                 # Trigger update
-                response = updateSheet(app.configVars)
+                response = updateSheet(os.environ['DATABASE_NAME'], os.environ['DATABASE_SHEET'])
                 if response['status'] == 'OK':
                     return {'status': 'OK'}, 200
                 else:
