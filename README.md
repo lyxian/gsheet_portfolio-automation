@@ -15,6 +15,8 @@ Features :
 Extras :
 
 - integrate encryptionStore
+- integrate route errors
+  - password related exceptions (log in app)
 
 ##Packages (list required packages & run .scripts/python-pip.sh)
 cryptography==37.0.4
@@ -24,4 +26,5 @@ requests==2.28.1
 gspread==5.4.0
 pyyaml==6.0
 flask==2.2.2
+pytest==7.1.2
 ##Packages

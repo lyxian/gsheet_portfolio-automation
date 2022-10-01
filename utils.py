@@ -21,7 +21,7 @@ def retrieveKey():
     required = ['APP_NAME', 'APP_PASS', 'STORE_PASS', 'STORE_URL']
     if all(param in os.environ for param in required):
         payload = {
-            'url': os.getenv('STORE_URL'),
+            'url': '{}/{}'.format(os.getenv('STORE_URL'), 'getPass'),
             'payload': {
                 'password': int(os.getenv('STORE_PASS')),
                 'app': os.getenv('APP_NAME'),
@@ -30,13 +30,35 @@ def retrieveKey():
         }
         response = requests.post(payload['url'], json=payload['payload']).json()
         if response.get('status') == 'OK':
-            return response.get('KEY')
+            key = response.get('KEY')
+            os.environ['KEY'] = key
+            return key
         else:
             raise Exception('Bad response from KEY_STORE, please try again ..')
     else:
         raise Exception('No key store found, please check config ..')
 
-def loadData():
+def postError(error):
+    required = ['APP_NAME', 'APP_PASS', 'STORE_PASS', 'STORE_URL']
+    if all(param in os.environ for param in required):
+        payload = {
+            'url': '{}/{}'.format(os.getenv('STORE_URL'), 'postError'),
+            'payload': {
+                'password': int(os.getenv('STORE_PASS')),
+                'app': os.getenv('APP_NAME'),
+                'key': int(os.getenv('APP_PASS')),
+                'error': error,
+            }
+        }
+        response = requests.post(payload['url'], json=payload['payload']).json()
+        if response.get('status') == 'OK':
+            return response
+        else:
+            raise Exception('Bad response from KEY_STORE, please try again ..')
+    else:
+        raise Exception('No key store found, please check config ..')
+
+def loadSecrets():
     configPath = 'secrets.yaml'
     if os.path.exists(configPath):
         with open(configPath) as file:
@@ -101,10 +123,10 @@ def sheetPayload(data):
         payload += [payload_i]
     return payload
 
-def updateSheet(configVars):
+def updateSheet(databaseName, databaseSheet):
     client = spreadSheetClient()
-    wb = openWorkbook_name(client, configVars['DATABASE_NAME'])
-    sheet = wb.worksheet(configVars['DATABASE_SHEET'])
+    wb = openWorkbook_name(client, databaseName)
+    sheet = wb.worksheet(databaseSheet)
     data = sheet.get_all_records()
 
     headers = list(data[0].keys())
@@ -156,16 +178,11 @@ def updateSheet(configVars):
             'result': response
         }
     except Exception as e:
-        return {
-            'status': 'NOT_OK',
-            'result': e.args[0]['message'][:100]
-        }
+        raise Exception(e.args[0]['message'][:100])
+        # return {
+        #     'status': 'NOT_OK',
+        #     'result': e.args[0]['message'][:100]
+        # }
 
 if __name__ == '__main__':
-    if 1:
-        configVars = loadData()
-        response = updateSheet(configVars)
-        print(response['status'], response['result'])
-    else:
-        with open('sample.json') as file:
-            data = json.load(file)
+    pass
