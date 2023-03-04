@@ -18,25 +18,28 @@ DATETIME_FORMAT = {
 }
 
 def retrieveKey():
-    required = ['APP_NAME', 'APP_PASS', 'STORE_PASS', 'STORE_URL']
-    if all(param in os.environ for param in required):
-        payload = {
-            'url': '{}/{}'.format(os.getenv('STORE_URL'), 'getPass'),
-            'payload': {
-                'password': int(os.getenv('STORE_PASS')),
-                'app': os.getenv('APP_NAME'),
-                'key': int(os.getenv('APP_PASS'))
-            }
-        }
-        response = requests.post(payload['url'], json=payload['payload']).json()
-        if response.get('status') == 'OK':
-            key = response.get('KEY')
-            os.environ['KEY'] = key
-            return key
-        else:
-            raise Exception('Bad response from KEY_STORE, please try again ..')
+    if os.getenv('LOCAL'):
+        return os.getenv('KEY')
     else:
-        raise Exception('No key store found, please check config ..')
+        required = ['APP_NAME', 'APP_PASS', 'STORE_PASS', 'STORE_URL']
+        if all(param in os.environ for param in required):
+            payload = {
+                'url': '{}/{}'.format(os.getenv('STORE_URL'), 'getPass'),
+                'payload': {
+                    'password': int(os.getenv('STORE_PASS')),
+                    'app': os.getenv('APP_NAME'),
+                    'key': int(os.getenv('APP_PASS'))
+                }
+            }
+            response = requests.post(payload['url'], json=payload['payload']).json()
+            if response.get('status') == 'OK':
+                key = response.get('KEY')
+                os.environ['KEY'] = key
+                return key
+            else:
+                raise Exception('Bad response from KEY_STORE, please try again ..')
+        else:
+            raise Exception('No key store found, please check config ..')
 
 def postError(error):
     required = ['APP_NAME', 'APP_PASS', 'STORE_PASS', 'STORE_URL']
