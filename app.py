@@ -2,11 +2,23 @@
 from flask import Flask, request
 import traceback
 import requests
+import sys
 import os
 
 from utils import updateSheet, postError
 
-DEBUG_MODE = os.environ.get("DEBUG_MODE", True)
+import pendulum
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.INFO)
+file_handler = logging.FileHandler(filename='app.log', mode='a', encoding='utf-8')
+logger.addHandler(file_handler)
+
+if len(sys.argv) > 1:
+    DEBUG_MODE = eval(sys.argv[1])
+else:
+    DEBUG_MODE = os.environ.get("DEBUG_MODE", True)
 
 app = Flask(__name__)
 
@@ -40,7 +52,11 @@ def _update():
         if 'password' in request.json and request.json['password'] == int(password):
             try:
                 # Trigger update
-                response = updateSheet(os.environ['DATABASE_NAME'], os.environ['DATABASE_SHEET'])
+                print(f'[{pendulum.now().to_datetime_string()}] Authenticated, proceeding with update ..')
+                if not DEBUG_MODE:
+                    logger.info(f'[{pendulum.now().to_datetime_string()}] Authenticated, proceeding with update ..')
+                response = updateSheet(os.environ['DATABASE_NAME'] #+ '-Test'
+                                       , os.environ['DATABASE_SHEET'])
                 if response['status'] == 'OK':
                     return {'status': 'OK'}, 200
                 else:
@@ -65,4 +81,6 @@ def _update():
         return {'status': 'NOT_OK', 'ERROR': 'Nothing here!'}, 404
 
 if __name__ == "__main__":
-    app.run(debug=DEBUG_MODE, host="0.0.0.0", port=int(os.environ.get("PORT", 5005)))
+    if not DEBUG_MODE:
+        logger.info(f'\n[{pendulum.now().to_datetime_string()}] Running app in ' + os.getenv('LOCALHOST') + ':' + str(os.environ.get('PORT', 5005)))
+    app.run(debug=DEBUG_MODE, host="0.0.0.0", port=int(os.environ.get('PORT', 5005))) # use_reloader=False
