@@ -141,7 +141,7 @@ def updateSheet(databaseName, databaseSheet):
     payload = sheetPayload(data)
     sheet.update(payload, raw=False)
     sheet.format(f'F2:F{len(data)+1}', DATETIME_FORMAT)
-    time.sleep(15)
+    time.sleep(30)
 
     # Get profits
     profit_columns = [i for i in headers if 'SGD' in i]
