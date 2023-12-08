@@ -18,6 +18,7 @@ Extras :
 - integrate route errors
   - password related exceptions (log in app)
 - run locally
+- retry upon failure
 
 ##Packages (list required packages & run .scripts/python-pip.sh)
 cryptography==37.0.4
