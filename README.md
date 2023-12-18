@@ -19,6 +19,7 @@ Extras :
   - password related exceptions (log in app)
 - run locally
 - retry upon failure
+- add argparse for test/prod
 
 ```
 ##Packages (list required packages & run .scripts/python-pip.sh)

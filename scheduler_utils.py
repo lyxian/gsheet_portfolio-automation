@@ -16,11 +16,12 @@ logger.addHandler(file_handler)
 logger.info(f'\n[{pendulum.now().to_datetime_string()}] Starting scheduler ..')
 
 
-def runUpdateSheet():
-    logger.info(f'[{pendulum.now().to_datetime_string()}] Updating sheet ..')
-    # databaseName = os.environ['DATABASE_NAME'] + '-Test'
+def runUpdateSheet(env):
+    logger.info(f'[{pendulum.now().to_datetime_string()}] Updating sheet ({env}) ..')
     databaseName = os.environ['DATABASE_NAME']
     databaseSheet = os.environ['DATABASE_SHEET']
+    if env == 'test':
+        databaseName += '-Test'
     
     t1 = default_timer()
     count = 1
