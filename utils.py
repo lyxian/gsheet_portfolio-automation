@@ -133,7 +133,7 @@ def updateSheet(databaseName, databaseSheet):
     data = sheet.get_all_records()
 
     headers = list(data[0].keys())
-    profit_headers = headers[-3:]
+    profit_headers = headers[-5:]
     reset_header = headers[4]
 
     # Refresh sheet -> add '-' in 'DateTime >>'
@@ -146,6 +146,9 @@ def updateSheet(databaseName, databaseSheet):
     # Get profits
     profit_columns = [i for i in headers if 'SGD' in i]
     profits = {col.split(' (SGD)')[0]: data[2][col] for col in profit_columns}
+    profits.update(
+        {col.split(' (SGD)')[0] + '_market': data[1][col] for col in profit_columns}
+    )
     profits[profit_headers[0]] = profit_headers[0]
 
     # Transform data

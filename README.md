@@ -18,8 +18,10 @@ Extras :
 - integrate route errors
   - password related exceptions (log in app)
 - run locally
-- retry upon failure
-- add argparse for test/prod
+- retry upon failure (√)
+- add argparse for test/prod (√)
+- track market_value (√)
+- .
 
 ```
 ##Packages (list required packages & run .scripts/python-pip.sh)
